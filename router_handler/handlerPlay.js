@@ -29,14 +29,14 @@ exports.getPlayData = function (req, res) {
     })
 }
 
-// 获取播放界面视频相关列表基本信息数据
+// 获取播放界面视频相关列表基本信息数据 列表id
 exports.getListData = function (req, res) {
     const dirname = req.params.dirname
     const sql =
         `
     SELECT  *
-    FROM myplaylist
-    WHERE myplaylist.v_id_dirname=${dirname}
+    FROM iw_my_playlist
+    WHERE iw_my_playlist.v_id_dirname=${dirname}
     `
     db.query(sql, '', function (err, results) {
         if (err) return res.cc(err)
@@ -44,8 +44,8 @@ exports.getListData = function (req, res) {
 
         const list = []
         results.forEach(function (value, key) {
-            console.log(value.p_id_playListId, key);
-            list.push(value.p_id_playListId)
+            // console.log(value.p_id_playlist_id, key);
+            list.push(value.p_id_playlist_id)
         })
         res.json({
             status: 0,
@@ -61,8 +61,8 @@ exports.getLoveData = function (req, res) {
     const sql =
         `
     SELECT  *
-    FROM love_list
-    WHERE love_list.v_id=${dirname}
+    FROM iw_love_list
+    WHERE iw_love_list.v_id=${dirname}
     `
     db.query(sql, '', function (err, results) {
         if (err) return res.cc(err)
@@ -85,7 +85,7 @@ exports.addLove = function (req, res) {
     const sql =
         `
     SELECT  *
-    FROM love_list
+    FROM iw_love_list
     WHERE v_id=${dirname} 
     `
     db.query(sql, '', function (err, results) {
@@ -94,11 +94,11 @@ exports.addLove = function (req, res) {
 
         const sql =
             `
-        UPDATE love_list
+        UPDATE iw_love_list
         SET love_level=${loveLevel}
         WHERE v_id=${dirname}
         `
-        console.log(sql);
+        // console.log(sql);
         db.query(sql, '', function (err, results) {
             res.json({
                 status: 0,
@@ -119,8 +119,8 @@ exports.addList = function (req, res) {
     const sql =
         `
         INSERT INTO 
-        playlist 
-        (playListName) 
+        iw_playlist 
+        (play_list_name) 
         VALUES('${listName}')
         `
     db.query(sql, '', function (err, results) {
@@ -146,9 +146,9 @@ exports.addMyPlaylist = function (req, res) {
     const sql =
         `
         SELECT  *
-        FROM myplaylist
+        FROM iw_my_playlist
         WHERE v_id_dirname=${dirname} 
-        AND p_id_playListId=${playlistId}
+        AND p_id_playlist_id=${playlistId}
         `
     // console.log(sql);
     db.query(sql, '', function (err, results) {
@@ -161,17 +161,17 @@ exports.addMyPlaylist = function (req, res) {
             sql =
                 `
                 INSERT INTO
-                myplaylist 
-                (v_id_dirname,p_id_playListId) 
+                iw_my_playlist 
+                (v_id_dirname,p_id_playlist_id) 
                 value('${dirname}','${playlistId}')
                 `
         } else if (results.length && isMyPlaylist == false) {
             sql =
                 `
                 DELETE
-                FROM myplaylist
+                FROM iw_my_playlist
                 WHERE v_id_dirname=${dirname} 
-                AND p_id_playListId=${playlistId} 
+                AND p_id_playlist_id=${playlistId} 
                 `
         }
         if (!sql) return res.cc('sql语句为空')
@@ -203,8 +203,8 @@ exports.deleteList = function (req, res) {
     const sql =
         `
         DELETE
-        FROM playlist
-        WHERE playListId=${listID}
+        FROM iw_playlist
+        WHERE play_list_id=${listID}
         `
     db.query(sql, '', function (err, results) {
         if (err) return res.cc(err)
@@ -213,8 +213,8 @@ exports.deleteList = function (req, res) {
         const sql =
             `
         DELETE
-        FROM myplaylist
-        WHERE p_id_playListId= ${listID}
+        FROM iw_my_playlist
+        WHERE p_id_playlist_id= ${listID}
         `
         db.query(sql, '', function (err, results) {
             if (err) return res.cc(err)

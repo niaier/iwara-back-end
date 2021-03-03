@@ -21,9 +21,9 @@ exports.getLoveData = function (req, res) {
     // 获取love总数目
     const sql = `
         SELECT  COUNT(*)
-        FROM iw_video_info,love_list
-        WHERE love_list.v_id=iw_video_info.dirname
-        AND love_list.love_level ${loveLevel}
+        FROM iw_video_info,iw_love_list
+        WHERE iw_love_list.v_id=iw_video_info.dirname
+        AND iw_love_list.love_level ${loveLevel}
         `
 
     db.query(sql, '', function (err, results) {
@@ -35,9 +35,9 @@ exports.getLoveData = function (req, res) {
         const sql =
             `
             SELECT  *
-            FROM iw_video_info,love_list
-            WHERE love_list.v_id=iw_video_info.dirname
-            AND love_list.love_level ${loveLevel}
+            FROM iw_video_info,iw_love_list
+            WHERE iw_love_list.v_id=iw_video_info.dirname
+            AND iw_love_list.love_level ${loveLevel}
             ORDER BY ${sort} ${desc}  
             LIMIT ${(curPage - 1) * 40},${40}
             `
