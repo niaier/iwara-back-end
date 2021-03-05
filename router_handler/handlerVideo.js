@@ -14,8 +14,9 @@ const config = require('../config')
 exports.getVideoData = function (req, res) {
     const sort = req.query.sort || 'upload_time'
     const desc = req.query.desc || 'desc'
+    const pagesize = req.query.pagesize || '40'
     const curPage = req.query.page || 1
-
+    console.log(curPage);
 
     const sql = `SELECT count(*) FROM iw_video_info WHERE isDown=1`
 
@@ -33,7 +34,7 @@ exports.getVideoData = function (req, res) {
               iw_video_info 
             WHERE isDown = 1 
             ORDER BY ${sort} ${desc} 
-            LIMIT ${(curPage-1) * 40}, ${40}
+            LIMIT ${(curPage-1) * pagesize}, ${pagesize}
             `
 
         db.query(sql, '', (err, results) => {
