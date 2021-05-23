@@ -1,17 +1,21 @@
 // 导入 express 模块
 const express = require('express')
-
+const path = require('path')
 // 创建 express 的服务器实例
 const app = express()
 
 
-const joi =require('@hapi/joi')
+const joi = require('@hapi/joi')
 
 // 导入 cors 中间件
 const cors = require('cors')
 // 将 cors 注册为全局中间件
 app.use(cors())
 
+
+// 启动静态资源
+// app.use(express.static(path.join(__dirname, '')))
+app.use(express.static('D:\\静态资源测试\\'))
 
 // 配置解析 application/x-www-form-urlencoded 格式的表单数据的中间件
 app.use(express.urlencoded({ extended: false }))
@@ -33,7 +37,7 @@ const expressJWT = require('express-jwt')
 const config = require('./config')
 
 // token验证
-app.use(expressJWT({secret: config.jwtSecretKey}).unless({path: [/^\/api/,/^\/info/]}))
+app.use(expressJWT({ secret: config.jwtSecretKey }).unless({ path: [/^\/api/, /^\/info/, /^\//] }))
 
 // 导入并注册用户路由模块
 const userRouter = require('./router/routerUser.js')
@@ -41,24 +45,31 @@ app.use('/api', userRouter)
 
 // 导入并注册用户信息路由模块
 const userinfoRouter = require('./router/routerUserinfo')
-app.use('/my',userinfoRouter)
+app.use('/my', userinfoRouter)
+
+
+
+// 导入并注册home数据获取模块
+const homeRouter = require('./router/routerHome.js')
+app.use('/api', homeRouter)
+
 
 // 导入并注册video数据获取模块
 const videoRouter = require('./router/routerVideo')
-app.use('/api',videoRouter)
+app.use('/api', videoRouter)
 
 // 导入并注册love数据获取模块
 const loveRouter = require('./router/routerLove')
-app.use('/api',loveRouter)
+app.use('/api', loveRouter)
 
 // 导入并注册playlist数据获取模块
 const playlistRouter = require('./router/routerPlaylist')
-app.use('/api',playlistRouter)
+app.use('/api', playlistRouter)
 
 
 // 导入并注册play数据获取模块
 const playRouter = require('./router/routerPlay')
-app.use('/api',playRouter)
+app.use('/api', playRouter)
 
 
 // 错误中间件

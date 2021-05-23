@@ -52,7 +52,7 @@ exports.getAllPlaylistData = function (req, res) {
         if (err) return res.cc(err)
         if (results.length < 1) return res.cc(`没有获取到playlist数据${sql}`)
         const total = results[0]['count(*)']
-
+        console.log(total);
         const sql = `
         SELECT  *
         FROM iw_my_playlist,iw_video_info
@@ -64,12 +64,18 @@ exports.getAllPlaylistData = function (req, res) {
         db.query(sql, '', function (err, results){
             if (err) return res.cc(err)
             if (results.length < 1) return res.cc(`没有获取到playlist数据${sql}`)
-    
+            // console.log(results);
+            results.map(function(value,index){
+                value.new_id = index
+            })
+            // console.log(results);
+            const video = Array.from(new Set(results))
+            // console.log(video);
             res.json({
                 status: 0,
                 message: '获取playlist数据成功!',
                 total,
-                results
+                video
             })
     
     
@@ -107,7 +113,7 @@ exports.getPointPlaylistData = function (req, res) {
         const sql = `
         SELECT  COUNT(*)
         FROM iw_my_playlist,iw_video_info
-        WHERE iw_my_playlist.p_id_playListId ${playListId}
+        WHERE iw_my_playlist.p_id_playList_id ${playListId}
         AND iw_my_playlist.v_id_dirname = iw_video_info.dirname 
         `
         // console.log(sql);
@@ -123,7 +129,7 @@ exports.getPointPlaylistData = function (req, res) {
                 `
                 SELECT  *
                 FROM iw_my_playlist,iw_video_info
-                WHERE iw_my_playlist.p_id_playListId ${playListId}
+                WHERE iw_my_playlist.p_id_playList_id ${playListId}
                 AND iw_my_playlist.v_id_dirname = iw_video_info.dirname 
                 ORDER BY ${sort} ${desc}
                 LIMIT ${(curPage-1) * 40}, ${40}

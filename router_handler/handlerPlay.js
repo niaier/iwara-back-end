@@ -9,9 +9,14 @@ const jwt = require('jsonwebtoken')
 //导入全局配置文件
 const config = require('../config')
 
+const fs = require('fs')
+
 // 获取播放界面视频基本信息数据
 exports.getPlayData = function (req, res) {
     const dirname = req.params.dirname
+    const fileList =fs.readdirSync('D:\\静态资源测试\\video\\202102141244')
+    const filename = fileList.find(item => /.mp4$/.test(item))
+    console.log(filename);
     const sql =
         `
     SELECT  *
@@ -20,18 +25,22 @@ exports.getPlayData = function (req, res) {
     `
     db.query(sql, '', function (err, results) {
         if (err) return res.cc(err)
-        if (results.length < 1) return res.cc('没有获取到video数据')
+        if (results.length < 1) return res.cc('没有获取到play页面video数据')
         res.json({
             status: 0,
-            message: '获取play数据成功!',
-            video: results[0]
+            message: '获取play页面video数据成功!',
+            video: results[0], 
+            filename
         })
     })
 }
 
+
+
 // 获取播放界面视频相关列表基本信息数据 列表id
 exports.getListData = function (req, res) {
     const dirname = req.params.dirname
+
     const sql =
         `
     SELECT  *
@@ -40,8 +49,6 @@ exports.getListData = function (req, res) {
     `
     db.query(sql, '', function (err, results) {
         if (err) return res.cc(err)
-        if (results.length < 1) return res.cc('没有获取到video数据')
-
         const list = []
         results.forEach(function (value, key) {
             // console.log(value.p_id_playlist_id, key);
@@ -49,7 +56,7 @@ exports.getListData = function (req, res) {
         })
         res.json({
             status: 0,
-            message: '获取play数据成功!',
+            message: '获取play页面已存在的相关列表数据成功!',
             list
         })
     })
@@ -64,14 +71,21 @@ exports.getLoveData = function (req, res) {
     FROM iw_love_list
     WHERE iw_love_list.v_id=${dirname}
     `
+    // console.log(sql);
     db.query(sql, '', function (err, results) {
         if (err) return res.cc(err)
-        if (results.length < 1) return res.cc('没有获取到love数据')
+        if (results.length < 1) {
+            return res.json({
+                status: 0,
+                message: '没有添加到love!',
+                loveLevel: 0
+            })
 
+        }
         res.json({
             status: 0,
             message: '获取Love数据成功!',
-            loveLevel:results[0].love_level
+            loveLevel: results[0].love_level
         })
     })
 }
@@ -84,22 +98,42 @@ exports.addLove = function (req, res) {
     // 首先判断是否存在
     const sql =
         `
-    SELECT  *
-    FROM iw_love_list
-    WHERE v_id=${dirname} 
-    `
-    db.query(sql, '', function (err, results) {
-        if (err) return res.cc(err)
-        if (results.length < 1) return res.cc('查询是否有love失败')
-
-        const sql =
-            `
-        UPDATE iw_love_list
-        SET love_level=${loveLevel}
-        WHERE v_id=${dirname}
+        SELECT  *
+        FROM iw_love_list
+        WHERE v_id=${dirname} 
         `
-        // console.log(sql);
+    db.query(sql, '', function (err, results) {
+        let sql
+        if (err) return res.cc(err)
+        if (results.length < 1) {
+            sql =
+                `
+                insert INTO 
+                iw_love_list 
+                (v_id,love_level) 
+                VALUES 
+                (${dirname},${loveLevel})
+                `
+        } else {
+            sql =
+                `
+                UPDATE iw_love_list
+                SET love_level=${loveLevel}
+                WHERE v_id=${dirname}
+                `
+        }
+        if (loveLevel == 0) {
+            sql = `
+                delete 
+                FROM 
+                iw_love_list
+                WHERE v_id=${dirname} 
+                `
+        }
+
         db.query(sql, '', function (err, results) {
+            if (err) return res.cc(err)
+            if (results.length < 1) res.cc('没有可删除的喜爱')
             res.json({
                 status: 0,
                 message: '添加love数据成功!',
@@ -136,7 +170,7 @@ exports.addList = function (req, res) {
 }
 
 
-//添加到我的播放列表
+//添加或删除到我的播放列表
 exports.addMyPlaylist = function (req, res) {
     const dirname = req.params.dirname
     // 判断是否添加到我的播放列表
